@@ -5,9 +5,36 @@
 Looking at Documentation is an important part of programming. You don't have to memorize anything, but you should get familiar with the types of information you can find in different docs. For this exercise, using the ActiveRecord documentation [here](http://guides.rubyonrails.org/active_record_querying.html#retrieving-objects-from-the-database), take a look at the following methods:
 
 1. `.find`
+
+Find by id - This can either be a specific id (1), a list of ids (1, 5, 6), or an array of ids ([5, 6, 10]). If one or more records cannot be found for the requested ids, then ActiveRecord::RecordNotFound will be raised. If the primary key is an integer, find by id coerces its arguments by using to_i.
+
+```
+Person.find(1)
+# returns the object for ID = 1
+
+Person.find("1")        
+# returns the object for ID = 1
+
+Person.find("31-sarah") 
+# returns the object for ID = 31
+
+Person.find(1, 2, 6)    
+# returns an array for objects with IDs in (1, 2, 6)
+
+Person.find([7, 17])    
+# returns an array for objects with IDs in (7, 17)
+
+Person.find([1])        
+# returns an array for the object with ID = 1
+
+Person.where("administrator = 1").order("created_on DESC").find(1)
+```
+
 2. `.find_by`
 
-Takes one or more args representing different columns in table.  Record is returned.  If record is not found, nil is returned (not error!).  Consider adding a conditional for your find_by methods.
+Finds the first record matching the specified conditions. There is no implied ordering so if order matters, you should specify it yourself.
+
+If no record is found, returns nil (not error!).  Consider adding a conditional for your find_by methods.
 
 3. `.where`
 
@@ -19,11 +46,22 @@ No arguments accepted, but can be chained by other methods or used with WHERE.  
 
 5. `.first`
 
-If no parameter is established, returns the first record by the primary key by default if no order method used.  Returns nil if no matching params.
+Find the first record (or first N records if a parameter is supplied). If no order is defined it will order by primary key. Returns nil if no matching params.
 
 ```
-customer = Customer.order(:first_name).first
-=> #<Customer id: 2, first_name: "Fifo">
+Person.first 
+# returns the first object fetched by 
+# SELECT * FROM people ORDER BY people.id LIMIT 1
+
+Person.where(["user_name = ?", user_name]).first
+
+Person.where(["user_name = :u", { u: user_name }]).first
+
+Person.order("created_on DESC").offset(5).first
+Person.first(3) 
+# returns the first three objects fetched by 
+# SELECT * FROM people ORDER BY people.id LIMIT 3
+
 ```
 
 6. `.destroy`
